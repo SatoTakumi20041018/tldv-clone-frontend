@@ -144,6 +144,37 @@ class ApiClient {
     });
   }
 
+  async uploadMeeting(
+    file: File,
+    name: string,
+    language: string
+  ): Promise<{ id: string }> {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("name", name);
+    formData.append("language", language);
+
+    const token = this.getToken();
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+    // Don't set Content-Type — browser sets it with boundary for FormData
+
+    const response = await fetch(`${API_BASE}/api/v1/meetings/upload`, {
+      method: "POST",
+      headers,
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || "Upload failed");
+    }
+
+    return response.json();
+  }
+
   // Integrations
   async getIntegrations(): Promise<Integration[]> {
     return this.request<Integration[]>("/api/v1/integrations");

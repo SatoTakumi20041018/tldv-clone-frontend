@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   Video,
   Clock,
@@ -16,6 +17,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import MeetingCard from "@/components/MeetingCard";
+import UploadModal from "@/components/UploadModal";
 import { mockMeetings, mockUser } from "@/lib/mockData";
 
 const mockFolders = [
@@ -77,6 +79,8 @@ const mockReports = [
 ];
 
 export default function DashboardPage() {
+  const [uploadModalOpen, setUploadModalOpen] = useState(false);
+
   const completedMeetings = mockMeetings.filter(
     (m) => m.status === "completed"
   );
@@ -90,6 +94,12 @@ export default function DashboardPage() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
+      {/* Upload Modal */}
+      <UploadModal
+        isOpen={uploadModalOpen}
+        onClose={() => setUploadModalOpen(false)}
+      />
+
       {/* Welcome Section */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
@@ -105,7 +115,10 @@ export default function DashboardPage() {
             <Sparkles className="w-4 h-4" />
             Ask tl;dv AI
           </button>
-          <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-white text-text-primary border border-gray-200 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors w-fit">
+          <button
+            onClick={() => setUploadModalOpen(true)}
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-white text-text-primary border border-gray-200 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors w-fit"
+          >
             <Plus className="w-4 h-4" />
             Import Meeting
           </button>

@@ -1,14 +1,16 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
-import { LayoutGrid, List, Plus, Video, Search, CalendarOff } from "lucide-react";
+import { LayoutGrid, List, Plus, Video, Search, CalendarOff, Upload } from "lucide-react";
 import MeetingCard from "@/components/MeetingCard";
 import SearchBar, { SearchFilters, SortOption } from "@/components/SearchBar";
+import UploadModal from "@/components/UploadModal";
 import { mockMeetings } from "@/lib/mockData";
 
 const LOAD_MORE_COUNT = 6;
 
 export default function MeetingsPage() {
+  const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("list");
   const [filters, setFilters] = useState<SearchFilters>({
@@ -107,6 +109,12 @@ export default function MeetingsPage() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
+      {/* Upload Modal */}
+      <UploadModal
+        isOpen={uploadModalOpen}
+        onClose={() => setUploadModalOpen(false)}
+      />
+
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
@@ -142,9 +150,12 @@ export default function MeetingsPage() {
               <LayoutGrid className="w-4 h-4" />
             </button>
           </div>
-          <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-brand-500 text-white rounded-xl text-sm font-medium hover:bg-brand-600 transition-colors shadow-sm">
-            <Plus className="w-4 h-4" />
-            Import
+          <button
+            onClick={() => setUploadModalOpen(true)}
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-brand-500 text-white rounded-xl text-sm font-medium hover:bg-brand-600 transition-colors shadow-sm"
+          >
+            <Upload className="w-4 h-4" />
+            Upload Meeting
           </button>
         </div>
       </div>
