@@ -174,59 +174,69 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
 
     setUploadState("uploading");
     setProgress(0);
+    setErrorMessage("");
 
-    try {
-      // Simulate upload progress since fetch doesn't natively support progress for uploads
-      // In production, you'd use XMLHttpRequest or a library with progress support
-      const progressInterval = setInterval(() => {
-        setProgress((prev) => {
-          if (prev >= 90) {
-            clearInterval(progressInterval);
-            return 90;
+    // Use XMLHttpRequest for real upload progress tracking
+    const xhr = new XMLHttpRequest();
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("name", fileName.trim());
+    formData.append("language", language);
+
+    const token = localStorage.getItem("auth_token");
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3006";
+
+    xhr.upload.addEventListener("progress", (e) => {
+      if (e.lengthComputable) {
+        const pct = Math.round((e.loaded / e.total) * 100);
+        setProgress(pct);
+        // Switch to processing when upload reaches 100%
+        if (pct >= 100) {
+          setUploadState("processing");
+        }
+      }
+    });
+
+    xhr.addEventListener("load", () => {
+      try {
+        const result = JSON.parse(xhr.responseText);
+        if (xhr.status >= 200 && xhr.status < 300) {
+          // Extract meeting ID from response (backend wraps in "meeting" key)
+          const meeting = result.meeting || result;
+          const id = meeting.id;
+          if (id) {
+            setMeetingId(id);
+            setUploadState("complete");
+          } else {
+            setErrorMessage("Meeting was created but ID was not returned.");
+            setUploadState("error");
           }
-          return prev + Math.random() * 15;
-        });
-      }, 300);
+        } else {
+          setErrorMessage(result.message || `Upload failed (HTTP ${xhr.status})`);
+          setUploadState("error");
+        }
+      } catch {
+        setErrorMessage("Invalid response from server.");
+        setUploadState("error");
+      }
+    });
 
-      const result = await api.uploadMeeting(file, fileName.trim(), language);
+    xhr.addEventListener("error", () => {
+      setErrorMessage("Network error. Please check your connection and try again.");
+      setUploadState("error");
+    });
 
-      clearInterval(progressInterval);
-      setProgress(100);
+    xhr.addEventListener("timeout", () => {
+      setErrorMessage("Upload timed out. The file may be too large for the current server.");
+      setUploadState("error");
+    });
 
-      // Brief pause at 100% then switch to processing
-      setTimeout(() => {
-        setUploadState("processing");
-      }, 500);
-
-      // Simulate processing/transcription time
-      // In production, you'd poll the API for status
-      setTimeout(() => {
-        setMeetingId(result.id || "1");
-        setUploadState("complete");
-      }, 3000);
-    } catch (err) {
-      // If the API is not available, simulate the full flow for demo purposes
-      const progressInterval = setInterval(() => {
-        setProgress((prev) => {
-          if (prev >= 100) {
-            clearInterval(progressInterval);
-            return 100;
-          }
-          return prev + Math.random() * 20;
-        });
-      }, 200);
-
-      setTimeout(() => {
-        clearInterval(progressInterval);
-        setProgress(100);
-        setUploadState("processing");
-      }, 2000);
-
-      setTimeout(() => {
-        setMeetingId("1");
-        setUploadState("complete");
-      }, 5000);
+    xhr.open("POST", `${baseUrl}/api/v1/meetings/upload`);
+    if (token) {
+      xhr.setRequestHeader("Authorization", `Bearer ${token}`);
     }
+    xhr.timeout = 120000; // 2 minute timeout
+    xhr.send(formData);
   }, [file, fileName, language]);
 
   const handleRetry = useCallback(() => {
@@ -480,10 +490,10 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
               </div>
               <div>
                 <p className="text-sm font-semibold text-text-primary animate-pulse">
-                  Transcribing your meeting...
+                  Processing & transcribing...
                 </p>
                 <p className="text-xs text-text-muted mt-1.5">
-                  This may take a few minutes depending on the video length
+                  Generating transcript, AI summary, and highlights
                 </p>
               </div>
               <div className="flex items-center justify-center gap-1.5">
