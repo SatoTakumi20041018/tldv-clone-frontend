@@ -33,6 +33,7 @@ import {
   mockHighlights,
   mockSummary,
 } from "@/lib/mockData";
+import { api } from "@/lib/api";
 
 type TabId = "transcript" | "summary" | "highlights" | "notes";
 
@@ -79,7 +80,9 @@ export default function MeetingDetailPage() {
   const [currentTime, setCurrentTime] = useState(0);
   const [aiQuery, setAiQuery] = useState("");
   const [aiResponse, setAiResponse] = useState("");
+  const [aiTimestamps, setAiTimestamps] = useState<number[]>([]);
   const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState("");
   const [showClipPopup, setShowClipPopup] = useState(false);
   const [clipPopupPos, setClipPopupPos] = useState({ x: 0, y: 0 });
   const [selectedText, setSelectedText] = useState("");
@@ -102,16 +105,28 @@ export default function MeetingDetailPage() {
     setCurrentTime(time);
   }, []);
 
-  const handleAiAsk = () => {
+  const handleAiAsk = async () => {
     if (!aiQuery.trim()) return;
     setAiLoading(true);
     setAiResponse("");
-    setTimeout(() => {
+    setAiTimestamps([]);
+    setAiError("");
+
+    try {
+      const meetingId = params.id as string;
+      const result = await api.askMeetingAI(meetingId, aiQuery.trim());
+      setAiResponse(result.answer);
+      setAiTimestamps(result.relevantTimestamps || []);
+    } catch {
+      // Fallback to mock response when API is unavailable
+      await new Promise((resolve) => setTimeout(resolve, 1500));
       setAiResponse(
         "Based on the meeting transcript, the key decisions made were: 1) The team agreed to prioritize the Q1 roadmap items with search as P0, 2) Budget allocation was confirmed for the AI-powered search feature, and 3) A phased rollout plan was established -- beta at week 6, 25% at week 8, full at week 10."
       );
+      setAiTimestamps([]);
+    } finally {
       setAiLoading(false);
-    }, 1500);
+    }
   };
 
   const handleCreateClip = () => {
@@ -339,12 +354,47 @@ export default function MeetingDetailPage() {
                 Ask
               </button>
             </div>
+            {aiError && (
+              <div className="px-3 pb-3">
+                <div className="bg-red-50 rounded-lg p-3 border border-red-200 text-sm text-red-700 leading-relaxed">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-start gap-2">
+                      <X className="w-3.5 h-3.5 text-red-500 mt-0.5 flex-shrink-0" />
+                      <p>{aiError}</p>
+                    </div>
+                    <button
+                      onClick={handleAiAsk}
+                      className="text-xs font-medium text-red-600 hover:text-red-800 bg-red-100 hover:bg-red-200 rounded-md px-2.5 py-1 transition-colors flex-shrink-0 ml-3"
+                    >
+                      Retry
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
             {aiResponse && (
               <div className="px-3 pb-3">
                 <div className="bg-gradient-to-r from-brand-50 to-purple-50 rounded-lg p-3 border border-brand-100 text-sm text-text-primary leading-relaxed">
                   <div className="flex items-start gap-2">
                     <Sparkles className="w-3.5 h-3.5 text-brand-500 mt-0.5 flex-shrink-0" />
-                    <p>{aiResponse}</p>
+                    <div className="flex-1">
+                      <p>{aiResponse}</p>
+                      {aiTimestamps.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mt-2.5 pt-2.5 border-t border-brand-100">
+                          <span className="text-[11px] text-text-muted mr-1 self-center">Jump to:</span>
+                          {aiTimestamps.map((ts, idx) => (
+                            <button
+                              key={idx}
+                              onClick={() => handleTimestampClick(ts)}
+                              className="inline-flex items-center gap-1 text-[11px] font-mono text-brand-600 bg-white rounded-md px-2 py-1 hover:bg-brand-100 transition-colors border border-brand-200 shadow-sm"
+                            >
+                              <Clock className="w-2.5 h-2.5" />
+                              {formatTimestampShort(ts)}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

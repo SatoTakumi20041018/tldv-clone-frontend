@@ -201,6 +201,34 @@ class ApiClient {
       body: JSON.stringify(data),
     });
   }
+
+  // Ask AI about a meeting
+  async askMeetingAI(
+    meetingId: string,
+    question: string
+  ): Promise<{ answer: string; relevantTimestamps: number[] }> {
+    return this.request<{ answer: string; relevantTimestamps: number[] }>(
+      `/api/v1/meetings/${meetingId}/ask`,
+      {
+        method: "POST",
+        body: JSON.stringify({ question }),
+      }
+    );
+  }
+
+  // Generate AI report
+  async generateReport(
+    meetingIds: string[],
+    reportType: string
+  ): Promise<{ id: string; title: string; content: string; meetingIds: string[]; reportType: string }> {
+    return this.request<{ id: string; title: string; content: string; meetingIds: string[]; reportType: string }>(
+      `/api/v1/reports/generate`,
+      {
+        method: "POST",
+        body: JSON.stringify({ meetingIds, reportType }),
+      }
+    );
+  }
 }
 
 export const api = new ApiClient();

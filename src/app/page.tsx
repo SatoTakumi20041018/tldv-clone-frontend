@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Video,
   Clock,
@@ -79,6 +80,7 @@ const mockReports = [
 ];
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
 
   const completedMeetings = mockMeetings.filter(
@@ -111,7 +113,10 @@ export default function DashboardPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-brand-500 to-brand-700 text-white rounded-xl text-sm font-medium hover:from-brand-600 hover:to-brand-800 transition-all shadow-sm shadow-brand-500/25 w-fit">
+          <button
+            onClick={() => router.push("/meetings")}
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-brand-500 to-brand-700 text-white rounded-xl text-sm font-medium hover:from-brand-600 hover:to-brand-800 transition-all shadow-sm shadow-brand-500/25 w-fit"
+          >
             <Sparkles className="w-4 h-4" />
             Ask tl;dv AI
           </button>

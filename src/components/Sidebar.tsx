@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Home,
   Video,
@@ -55,11 +55,13 @@ const mockFolders = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { user, logout } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [foldersExpanded, setFoldersExpanded] = useState(true);
   const [libraryExpanded, setLibraryExpanded] = useState(false);
+  const [showAiModal, setShowAiModal] = useState(false);
 
   const initials = user?.name
     ? user.name
@@ -121,7 +123,10 @@ export default function Sidebar() {
         {/* Ask tl;dv AI */}
         {!collapsed ? (
           <div className="px-3 pt-3 pb-1">
-            <button className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-gradient-to-r from-brand-500/20 to-purple-500/20 border border-brand-500/30 text-white hover:from-brand-500/30 hover:to-purple-500/30 transition-all group">
+            <button
+              onClick={() => setShowAiModal(true)}
+              className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-gradient-to-r from-brand-500/20 to-purple-500/20 border border-brand-500/30 text-white hover:from-brand-500/30 hover:to-purple-500/30 transition-all group"
+            >
               <Sparkles className="w-4 h-4 text-brand-300 group-hover:text-brand-200 flex-shrink-0" />
               <span className="text-sm font-medium text-white/90 group-hover:text-white">Ask tl;dv AI</span>
             </button>
@@ -129,6 +134,7 @@ export default function Sidebar() {
         ) : (
           <div className="px-3 pt-3 pb-1 flex justify-center">
             <button
+              onClick={() => setShowAiModal(true)}
               className="w-10 h-10 rounded-lg bg-gradient-to-r from-brand-500/20 to-purple-500/20 border border-brand-500/30 flex items-center justify-center text-brand-300 hover:text-brand-200 transition-colors"
               title="Ask tl;dv AI"
             >
@@ -427,6 +433,54 @@ export default function Sidebar() {
       <div
         className={`hidden lg:block flex-shrink-0 transition-all duration-300 ${collapsed ? "w-[72px]" : "w-[260px]"}`}
       />
+
+      {/* Ask tl;dv AI Modal */}
+      {showAiModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/30 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 w-[440px] p-6 animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-purple-500 flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-white" />
+                </div>
+                <h3 className="text-sm font-semibold text-text-primary">
+                  Ask tl;dv AI
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowAiModal(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="bg-gradient-to-r from-brand-50 to-purple-50 rounded-xl p-4 border border-brand-100 mb-4">
+              <div className="flex items-start gap-2.5">
+                <Sparkles className="w-4 h-4 text-brand-500 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-sm text-text-primary font-medium mb-1">
+                    Navigate to a meeting to use Ask AI
+                  </p>
+                  <p className="text-xs text-text-secondary leading-relaxed">
+                    Open any meeting recording and use the AI bar to ask questions about that specific meeting&apos;s transcript, decisions, and action items.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                setShowAiModal(false);
+                router.push("/meetings");
+              }}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-brand-500 text-white rounded-xl text-sm font-medium hover:bg-brand-600 transition-colors"
+            >
+              Go to Meetings
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }
