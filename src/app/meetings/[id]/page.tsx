@@ -14,6 +14,11 @@ import {
   Star,
   Lightbulb,
   StickyNote,
+  Sparkles,
+  Scissors,
+  Send,
+  PenSquare,
+  X,
 } from "lucide-react";
 import VideoPlayer from "@/components/VideoPlayer";
 import TranscriptView from "@/components/TranscriptView";
@@ -49,6 +54,12 @@ export default function MeetingDetailPage() {
   const [seekTo, setSeekTo] = useState<number | undefined>(undefined);
   const [currentTime, setCurrentTime] = useState(0);
   const [notes, setNotes] = useState("");
+  const [aiQuery, setAiQuery] = useState("");
+  const [aiResponse, setAiResponse] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [showQuickNote, setShowQuickNote] = useState(false);
+  const [quickNote, setQuickNote] = useState("");
+  const [showClipToast, setShowClipToast] = useState(false);
 
   const meeting = mockMeetings.find((m) => m.id === params.id);
 
@@ -60,6 +71,24 @@ export default function MeetingDetailPage() {
   const handleTimeUpdate = useCallback((time: number) => {
     setCurrentTime(time);
   }, []);
+
+  const handleAiAsk = () => {
+    if (!aiQuery.trim()) return;
+    setAiLoading(true);
+    setAiResponse("");
+    // Simulate AI response
+    setTimeout(() => {
+      setAiResponse(
+        "Based on the meeting transcript, the key decisions made were: 1) The team agreed to prioritize the Q2 roadmap items, 2) Budget allocation was confirmed for the new feature, and 3) Next review meeting was scheduled for next Friday."
+      );
+      setAiLoading(false);
+    }, 1500);
+  };
+
+  const handleCreateClip = () => {
+    setShowClipToast(true);
+    setTimeout(() => setShowClipToast(false), 3000);
+  };
 
   if (!meeting) {
     return (
@@ -127,6 +156,13 @@ export default function MeetingDetailPage() {
         </div>
 
         <div className="flex items-center gap-2">
+          <button
+            onClick={handleCreateClip}
+            className="flex items-center gap-2 px-3 py-2 bg-brand-50 border border-brand-200 rounded-lg text-sm text-brand-600 hover:bg-brand-100 transition-colors font-medium"
+          >
+            <Scissors className="w-4 h-4" />
+            Create Clip
+          </button>
           <button className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-text-secondary hover:border-gray-300 transition-colors">
             <Share2 className="w-4 h-4" />
             Share
@@ -136,6 +172,45 @@ export default function MeetingDetailPage() {
             Download
           </button>
         </div>
+      </div>
+
+      {/* Ask tl;dv AI bar */}
+      <div className="bg-gradient-to-r from-brand-50 to-purple-50 rounded-xl border border-brand-100 p-4 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-purple-500 flex items-center justify-center flex-shrink-0">
+            <Sparkles className="w-4 h-4 text-white" />
+          </div>
+          <div className="flex-1 flex items-center gap-2">
+            <input
+              type="text"
+              value={aiQuery}
+              onChange={(e) => setAiQuery(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleAiAsk()}
+              placeholder="Ask tl;dv AI about this meeting... e.g. 'What were the key decisions?'"
+              className="flex-1 bg-white rounded-lg px-4 py-2.5 text-sm text-text-primary placeholder-gray-400 outline-none border border-brand-200/50 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-300 transition-all"
+            />
+            <button
+              onClick={handleAiAsk}
+              disabled={aiLoading || !aiQuery.trim()}
+              className="px-4 py-2.5 bg-brand-500 text-white rounded-lg text-sm font-medium hover:bg-brand-600 transition-colors disabled:opacity-50 flex items-center gap-2 flex-shrink-0"
+            >
+              {aiLoading ? (
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <Send className="w-4 h-4" />
+              )}
+              Ask AI
+            </button>
+          </div>
+        </div>
+        {aiResponse && (
+          <div className="mt-3 ml-11 bg-white rounded-lg p-3 border border-brand-100 text-sm text-text-primary leading-relaxed">
+            <div className="flex items-start gap-2">
+              <Sparkles className="w-3.5 h-3.5 text-brand-500 mt-0.5 flex-shrink-0" />
+              <p>{aiResponse}</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Participants */}
@@ -252,6 +327,62 @@ You can use this space to capture your thoughts, follow-ups, or anything else fr
           </div>
         </div>
       </div>
+
+      {/* Floating quick note button */}
+      <div className="fixed bottom-6 right-6 z-40">
+        {showQuickNote ? (
+          <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 w-80 p-4 animate-in fade-in slide-in-from-bottom-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <PenSquare className="w-4 h-4 text-brand-500" />
+                <span className="text-sm font-semibold text-text-primary">Quick Note</span>
+              </div>
+              <button
+                onClick={() => setShowQuickNote(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <textarea
+              value={quickNote}
+              onChange={(e) => setQuickNote(e.target.value)}
+              placeholder="Jot down a quick note..."
+              className="w-full h-24 resize-none bg-gray-50 rounded-lg p-3 text-sm text-text-primary placeholder-gray-400 outline-none border border-gray-200 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-300 transition-all"
+              autoFocus
+            />
+            <div className="flex justify-end mt-2">
+              <button
+                onClick={() => {
+                  setNotes((prev) => prev + (prev ? "\n" : "") + quickNote);
+                  setQuickNote("");
+                  setShowQuickNote(false);
+                }}
+                disabled={!quickNote.trim()}
+                className="px-3 py-1.5 bg-brand-500 text-white rounded-lg text-xs font-medium hover:bg-brand-600 transition-colors disabled:opacity-50"
+              >
+                Add to Notes
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            onClick={() => setShowQuickNote(true)}
+            className="w-12 h-12 bg-brand-500 text-white rounded-full shadow-lg shadow-brand-500/30 flex items-center justify-center hover:bg-brand-600 transition-colors hover:scale-105 active:scale-95"
+            title="Quick Note"
+          >
+            <PenSquare className="w-5 h-5" />
+          </button>
+        )}
+      </div>
+
+      {/* Clip created toast */}
+      {showClipToast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-text-primary text-white px-5 py-3 rounded-xl shadow-xl flex items-center gap-3 animate-in fade-in slide-in-from-bottom-4">
+          <Scissors className="w-4 h-4 text-brand-300" />
+          <span className="text-sm font-medium">Clip created! You can find it in Clips & Reels.</span>
+        </div>
+      )}
     </div>
   );
 }

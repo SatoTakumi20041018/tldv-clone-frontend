@@ -9,10 +9,46 @@ import {
   ArrowRight,
   Plus,
   TrendingUp,
+  FolderOpen,
+  Film,
+  Sparkles,
+  Play,
 } from "lucide-react";
+import Link from "next/link";
 import StatsCard from "@/components/StatsCard";
 import MeetingCard from "@/components/MeetingCard";
 import { mockMeetings, mockUser } from "@/lib/mockData";
+
+const mockFolders = [
+  { id: "1", name: "Sales Calls", count: 12, color: "bg-blue-500" },
+  { id: "2", name: "Product Syncs", count: 8, color: "bg-emerald-500" },
+  { id: "3", name: "Customer Interviews", count: 5, color: "bg-orange-500" },
+  { id: "4", name: "Team Standups", count: 22, color: "bg-purple-500" },
+];
+
+const mockClips = [
+  {
+    id: "1",
+    title: "Key pricing discussion",
+    meetingTitle: "Sales Pipeline Review",
+    duration: "1:24",
+    timestamp: "2 hours ago",
+  },
+  {
+    id: "2",
+    title: "Feature demo feedback",
+    meetingTitle: "Product Demo - Enterprise",
+    duration: "0:45",
+    timestamp: "Yesterday",
+  },
+  {
+    id: "3",
+    title: "Q2 goals alignment",
+    meetingTitle: "Quarterly Planning",
+    duration: "2:10",
+    timestamp: "2 days ago",
+  },
+];
 
 export default function DashboardPage() {
   const completedMeetings = mockMeetings.filter(
@@ -38,10 +74,16 @@ export default function DashboardPage() {
             Here&apos;s what&apos;s happening with your meetings today.
           </p>
         </div>
-        <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-brand-500 text-white rounded-xl text-sm font-medium hover:bg-brand-600 transition-colors shadow-sm shadow-brand-500/25 w-fit">
-          <Plus className="w-4 h-4" />
-          Import Meeting
-        </button>
+        <div className="flex items-center gap-3">
+          <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-brand-500 to-purple-500 text-white rounded-xl text-sm font-medium hover:from-brand-600 hover:to-purple-600 transition-all shadow-sm shadow-brand-500/25 w-fit">
+            <Sparkles className="w-4 h-4" />
+            Ask tl;dv AI
+          </button>
+          <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-brand-500 text-white rounded-xl text-sm font-medium hover:bg-brand-600 transition-colors shadow-sm shadow-brand-500/25 w-fit">
+            <Plus className="w-4 h-4" />
+            Import Meeting
+          </button>
+        </div>
       </div>
 
       {/* Stats cards */}
@@ -77,6 +119,85 @@ export default function DashboardPage() {
           color="orange"
           subtitle="3 due today"
         />
+      </div>
+
+      {/* Folders section */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-text-primary flex items-center gap-2">
+            <FolderOpen className="w-5 h-5 text-text-muted" />
+            Folders
+          </h2>
+          <button className="text-sm text-brand-500 hover:text-brand-600 font-medium flex items-center gap-1">
+            <Plus className="w-3.5 h-3.5" />
+            New Folder
+          </button>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {mockFolders.map((folder) => (
+            <Link
+              key={folder.id}
+              href="/meetings"
+              className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md hover:border-gray-200 transition-all group cursor-pointer"
+            >
+              <div className={`w-10 h-10 rounded-lg ${folder.color}/10 flex items-center justify-center mb-3`}>
+                <FolderOpen className={`w-5 h-5 ${folder.color.replace('bg-', 'text-')}`} />
+              </div>
+              <h3 className="text-sm font-semibold text-text-primary group-hover:text-brand-500 transition-colors truncate">
+                {folder.name}
+              </h3>
+              <p className="text-xs text-text-muted mt-0.5">
+                {folder.count} meetings
+              </p>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* Recent Clips section */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-text-primary flex items-center gap-2">
+            <Film className="w-5 h-5 text-text-muted" />
+            Recent Clips
+          </h2>
+          <Link
+            href="/meetings"
+            className="text-sm text-brand-500 hover:text-brand-600 font-medium flex items-center gap-1"
+          >
+            View all clips
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {mockClips.map((clip) => (
+            <div
+              key={clip.id}
+              className="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md hover:border-gray-200 transition-all group cursor-pointer overflow-hidden"
+            >
+              {/* Clip thumbnail placeholder */}
+              <div className="relative bg-gradient-to-br from-gray-100 to-gray-200 h-28 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full bg-black/40 flex items-center justify-center group-hover:bg-brand-500 transition-colors">
+                  <Play className="w-4 h-4 text-white ml-0.5" />
+                </div>
+                <span className="absolute bottom-2 right-2 bg-black/70 text-white text-[10px] font-medium px-1.5 py-0.5 rounded">
+                  {clip.duration}
+                </span>
+              </div>
+              <div className="p-3">
+                <h3 className="text-sm font-semibold text-text-primary truncate group-hover:text-brand-500 transition-colors">
+                  {clip.title}
+                </h3>
+                <p className="text-xs text-text-muted mt-0.5 truncate">
+                  {clip.meetingTitle}
+                </p>
+                <p className="text-[10px] text-text-muted mt-1">
+                  {clip.timestamp}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Main content grid */}
