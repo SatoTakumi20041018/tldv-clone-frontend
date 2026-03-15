@@ -31,6 +31,7 @@ export const mockMeetings: Meeting[] = [
       { id: "p4", name: "Emily Davis" },
     ],
     status: "completed",
+    meetingType: "internal",
     summaryPreview:
       "Discussed Q1 product roadmap priorities, finalized feature rollout timeline, and assigned ownership for key deliverables.",
     createdAt: "2026-03-14T15:00:00Z",
@@ -47,6 +48,7 @@ export const mockMeetings: Meeting[] = [
       { id: "p6", name: "Jordan Lee" },
     ],
     status: "completed",
+    meetingType: "internal",
     summaryPreview:
       "Sprint backlog groomed and prioritized. Velocity target set at 34 story points. Two tech debt items added.",
     createdAt: "2026-03-13T11:00:00Z",
@@ -63,6 +65,7 @@ export const mockMeetings: Meeting[] = [
       { id: "p8", name: "Tom Roberts", role: "host" },
     ],
     status: "completed",
+    meetingType: "external",
     summaryPreview:
       "Onboarding kickoff for Acme Corp. Covered platform setup, data migration timeline, and training schedule.",
     createdAt: "2026-03-12T17:00:00Z",
@@ -79,6 +82,7 @@ export const mockMeetings: Meeting[] = [
       { id: "p10", name: "Chris Yang" },
     ],
     status: "completed",
+    meetingType: "internal",
     summaryPreview:
       "Reviewed dashboard v2 mockups. Approved new analytics widgets. Requested mobile responsive adjustments.",
     createdAt: "2026-03-11T10:30:00Z",
@@ -97,6 +101,7 @@ export const mockMeetings: Meeting[] = [
       { id: "p9", name: "Nina Patel" },
     ],
     status: "completed",
+    meetingType: "internal",
     summaryPreview:
       "Quick status updates from all team members. No blockers reported. Release v2.1 on track.",
     createdAt: "2026-03-10T09:15:00Z",
@@ -113,6 +118,7 @@ export const mockMeetings: Meeting[] = [
       { id: "p12", name: "Rachel Kim" },
     ],
     status: "completed",
+    meetingType: "external",
     summaryPreview:
       "Presented Q4 metrics and Q1 projections. Investors expressed confidence in growth trajectory. Follow-up scheduled.",
     createdAt: "2026-03-09T16:00:00Z",
@@ -128,6 +134,7 @@ export const mockMeetings: Meeting[] = [
       { id: "p5", name: "Alex Rivera" },
     ],
     status: "scheduled",
+    meetingType: "internal",
     createdAt: "2026-03-08T10:00:00Z",
   },
   {
@@ -142,6 +149,7 @@ export const mockMeetings: Meeting[] = [
       { id: "p14", name: "Ben Torres" },
     ],
     status: "scheduled",
+    meetingType: "external",
     createdAt: "2026-03-08T10:00:00Z",
   },
 ];
@@ -390,13 +398,14 @@ export const mockSummary: MeetingSummary = {
 };
 
 export const mockIntegrations: Integration[] = [
+  // Video Conferencing
   {
     id: "int1",
     name: "Zoom",
     description:
       "Automatically record and transcribe your Zoom meetings. Get AI summaries and action items.",
     icon: "zoom",
-    category: "communication",
+    category: "video_conferencing",
     connected: true,
     status: "active",
     lastSynced: "2026-03-15T08:00:00Z",
@@ -407,7 +416,7 @@ export const mockIntegrations: Integration[] = [
     description:
       "Connect Google Meet to automatically capture and analyze your meetings.",
     icon: "google_meet",
-    category: "communication",
+    category: "video_conferencing",
     connected: true,
     status: "active",
     lastSynced: "2026-03-14T12:00:00Z",
@@ -418,9 +427,10 @@ export const mockIntegrations: Integration[] = [
     description:
       "Integrate with Teams to record, transcribe, and summarize your meetings automatically.",
     icon: "teams",
-    category: "communication",
+    category: "video_conferencing",
     connected: false,
   },
+  // CRM
   {
     id: "int4",
     name: "HubSpot",
@@ -443,6 +453,16 @@ export const mockIntegrations: Integration[] = [
   },
   {
     id: "int6",
+    name: "Pipedrive",
+    description:
+      "Automatically log meeting notes and action items to your Pipedrive deals and contacts.",
+    icon: "pipedrive",
+    category: "crm",
+    connected: false,
+  },
+  // Communication
+  {
+    id: "int7",
     name: "Slack",
     description:
       "Get notified in Slack when meetings are processed. Share summaries to channels.",
@@ -453,7 +473,17 @@ export const mockIntegrations: Integration[] = [
     lastSynced: "2026-03-15T09:00:00Z",
   },
   {
-    id: "int7",
+    id: "int8",
+    name: "Discord",
+    description:
+      "Post meeting summaries and highlights to Discord channels automatically.",
+    icon: "discord",
+    category: "communication",
+    connected: false,
+  },
+  // Project Management
+  {
+    id: "int9",
     name: "Notion",
     description:
       "Export meeting notes, transcripts, and action items to your Notion workspace.",
@@ -462,32 +492,12 @@ export const mockIntegrations: Integration[] = [
     connected: false,
   },
   {
-    id: "int8",
-    name: "Jira",
-    description:
-      "Create Jira tickets from meeting action items automatically. Track follow-ups.",
-    icon: "jira",
-    category: "project_management",
-    connected: false,
-  },
-  {
-    id: "int9",
-    name: "Google Drive",
-    description:
-      "Save meeting recordings, transcripts, and summaries to Google Drive folders.",
-    icon: "google_drive",
-    category: "storage",
-    connected: true,
-    status: "active",
-    lastSynced: "2026-03-14T18:00:00Z",
-  },
-  {
     id: "int10",
-    name: "Dropbox",
+    name: "Trello",
     description:
-      "Store and organize your meeting recordings and documents in Dropbox.",
-    icon: "dropbox",
-    category: "storage",
+      "Create Trello cards from meeting action items. Keep your boards in sync with meetings.",
+    icon: "trello",
+    category: "project_management",
     connected: false,
   },
   {
@@ -505,6 +515,124 @@ export const mockIntegrations: Integration[] = [
     description:
       "Push action items and engineering tasks from meetings directly to Linear.",
     icon: "linear",
+    category: "project_management",
+    connected: false,
+  },
+  {
+    id: "int13",
+    name: "Jira",
+    description:
+      "Create Jira tickets from meeting action items automatically. Track follow-ups.",
+    icon: "jira",
+    category: "project_management",
+    connected: false,
+  },
+  {
+    id: "int14",
+    name: "Monday.com",
+    description:
+      "Sync meeting outcomes and tasks to Monday.com boards. Automate your workflow.",
+    icon: "monday",
+    category: "project_management",
+    connected: false,
+  },
+  {
+    id: "int15",
+    name: "ClickUp",
+    description:
+      "Turn meeting action items into ClickUp tasks. Never lose track of follow-ups.",
+    icon: "clickup",
+    category: "project_management",
+    connected: false,
+  },
+  // Storage
+  {
+    id: "int16",
+    name: "Google Drive",
+    description:
+      "Save meeting recordings, transcripts, and summaries to Google Drive folders.",
+    icon: "google_drive",
+    category: "storage",
+    connected: true,
+    status: "active",
+    lastSynced: "2026-03-14T18:00:00Z",
+  },
+  {
+    id: "int17",
+    name: "Dropbox",
+    description:
+      "Store and organize your meeting recordings and documents in Dropbox.",
+    icon: "dropbox",
+    category: "storage",
+    connected: false,
+  },
+  // Automation
+  {
+    id: "int18",
+    name: "Zapier",
+    description:
+      "Connect tl;dv to 5,000+ apps with automated workflows. No code required.",
+    icon: "zapier",
+    category: "automation",
+    connected: false,
+  },
+  // Note Taking
+  {
+    id: "int19",
+    name: "Google Docs",
+    description:
+      "Export meeting transcripts and summaries directly to Google Docs for easy sharing.",
+    icon: "google_docs",
+    category: "note_taking",
+    connected: false,
+  },
+  // Calendar
+  {
+    id: "int20",
+    name: "Google Calendar",
+    description:
+      "Sync with Google Calendar to auto-join and record scheduled meetings.",
+    icon: "google_calendar",
+    category: "calendar",
+    connected: true,
+    status: "active",
+    lastSynced: "2026-03-15T06:00:00Z",
+  },
+  {
+    id: "int21",
+    name: "Outlook Calendar",
+    description:
+      "Connect Outlook Calendar to automatically detect and record your meetings.",
+    icon: "outlook_calendar",
+    category: "calendar",
+    connected: false,
+  },
+  // HR & Recruitment
+  {
+    id: "int22",
+    name: "Greenhouse",
+    description:
+      "Automatically attach interview notes and scorecards to Greenhouse candidate profiles.",
+    icon: "greenhouse",
+    category: "hr_recruitment",
+    connected: false,
+  },
+  // Additional tools
+  {
+    id: "int23",
+    name: "Miro",
+    description:
+      "Push meeting insights and action items to Miro boards for visual collaboration.",
+    icon: "miro",
+    category: "project_management",
+    connected: false,
+  },
+  {
+    id: "int24",
+    name: "Airtable",
+    description:
+      "Log meeting data and action items to Airtable bases for custom tracking and reporting.",
+    icon: "airtable",
     category: "project_management",
     connected: false,
   },

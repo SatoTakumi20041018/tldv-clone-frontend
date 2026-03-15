@@ -4,9 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard,
+  Home,
   Video,
-  Lightbulb,
   Puzzle,
   Settings,
   LogOut,
@@ -21,13 +20,29 @@ import {
   FolderClosed,
   FolderOpen,
   Plus,
+  BookOpen,
+  Share2,
+  BarChart3,
+  GraduationCap,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 
-const navItems = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/meetings", label: "Meetings", icon: Video },
-  { href: "/insights", label: "Insights", icon: Lightbulb },
+const topNavItems = [
+  { href: "/", label: "Home", icon: Home },
+  { href: "/meetings", label: "My Meetings", icon: Video },
+];
+
+const librarySubItems = [
+  { href: "/meetings", label: "All Recordings", icon: BookOpen },
+  { href: "/meetings", label: "Shared with me", icon: Share2 },
+];
+
+const bottomNavItems = [
+  { href: "/reports", label: "AI Reports", icon: BarChart3 },
+  { href: "/coaching", label: "AI Coaching Hub", icon: GraduationCap },
+];
+
+const utilNavItems = [
   { href: "/integrations", label: "Integrations", icon: Puzzle },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
@@ -44,6 +59,7 @@ export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [foldersExpanded, setFoldersExpanded] = useState(true);
+  const [libraryExpanded, setLibraryExpanded] = useState(false);
 
   const initials = user?.name
     ? user.name
@@ -138,7 +154,8 @@ export default function Sidebar() {
 
         {/* Nav items */}
         <nav className="flex-1 px-3 py-2 space-y-1 overflow-y-auto">
-          {navItems.map((item) => {
+          {/* Home & My Meetings */}
+          {topNavItems.map((item) => {
             const isActive =
               pathname === item.href ||
               (item.href !== "/" && pathname.startsWith(item.href));
@@ -146,7 +163,7 @@ export default function Sidebar() {
 
             return (
               <Link
-                key={item.href}
+                key={item.label}
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
                 className={`
@@ -168,6 +185,49 @@ export default function Sidebar() {
             );
           })}
 
+          {/* Library (collapsible) */}
+          {!collapsed ? (
+            <div>
+              <button
+                onClick={() => setLibraryExpanded(!libraryExpanded)}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 text-white/60 hover:text-white hover:bg-sidebar-light w-full"
+              >
+                <BookOpen className="w-5 h-5 flex-shrink-0" />
+                <span className="text-sm font-medium flex-1 text-left">Library</span>
+                <ChevronDown
+                  className={`w-4 h-4 text-white/40 transition-transform duration-200 ${
+                    libraryExpanded ? "" : "-rotate-90"
+                  }`}
+                />
+              </button>
+              {libraryExpanded && (
+                <div className="ml-4 mt-0.5 space-y-0.5">
+                  {librarySubItems.map((sub) => {
+                    const SubIcon = sub.icon;
+                    return (
+                      <Link
+                        key={sub.label}
+                        href={sub.href}
+                        onClick={() => setMobileOpen(false)}
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-white/50 hover:text-white/80 hover:bg-sidebar-light transition-all"
+                      >
+                        <SubIcon className="w-4 h-4 flex-shrink-0" />
+                        <span className="text-sm">{sub.label}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          ) : (
+            <button
+              className="flex items-center justify-center px-3 py-2.5 rounded-lg text-white/60 hover:text-white hover:bg-sidebar-light transition-all w-full"
+              title="Library"
+            >
+              <BookOpen className="w-5 h-5 flex-shrink-0" />
+            </button>
+          )}
+
           {/* Clips & Reels */}
           <Link
             href="/meetings"
@@ -184,6 +244,37 @@ export default function Sidebar() {
               <span className="text-sm font-medium">Clips & Reels</span>
             )}
           </Link>
+
+          {/* AI Reports & AI Coaching Hub */}
+          {bottomNavItems.map((item) => {
+            const isActive =
+              pathname === item.href ||
+              (item.href !== "/" && pathname.startsWith(item.href));
+            const Icon = item.icon;
+
+            return (
+              <Link
+                key={item.label}
+                href={item.href}
+                onClick={() => setMobileOpen(false)}
+                className={`
+                  flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200
+                  ${
+                    isActive
+                      ? "bg-brand-500 text-white shadow-lg shadow-brand-500/25"
+                      : "text-white/60 hover:text-white hover:bg-sidebar-light"
+                  }
+                  ${collapsed ? "justify-center" : ""}
+                `}
+                title={collapsed ? item.label : undefined}
+              >
+                <Icon className="w-5 h-5 flex-shrink-0" />
+                {!collapsed && (
+                  <span className="text-sm font-medium">{item.label}</span>
+                )}
+              </Link>
+            );
+          })}
 
           {/* Folders section */}
           {!collapsed && (
@@ -238,7 +329,52 @@ export default function Sidebar() {
               <FolderClosed className="w-5 h-5 flex-shrink-0" />
             </button>
           )}
+
+          {/* Divider */}
+          <div className="pt-2 pb-1">
+            <div className="border-t border-white/10" />
+          </div>
+
+          {/* Integrations & Settings */}
+          {utilNavItems.map((item) => {
+            const isActive =
+              pathname === item.href ||
+              (item.href !== "/" && pathname.startsWith(item.href));
+            const Icon = item.icon;
+
+            return (
+              <Link
+                key={item.label}
+                href={item.href}
+                onClick={() => setMobileOpen(false)}
+                className={`
+                  flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200
+                  ${
+                    isActive
+                      ? "bg-brand-500 text-white shadow-lg shadow-brand-500/25"
+                      : "text-white/60 hover:text-white hover:bg-sidebar-light"
+                  }
+                  ${collapsed ? "justify-center" : ""}
+                `}
+                title={collapsed ? item.label : undefined}
+              >
+                <Icon className="w-5 h-5 flex-shrink-0" />
+                {!collapsed && (
+                  <span className="text-sm font-medium">{item.label}</span>
+                )}
+              </Link>
+            );
+          })}
         </nav>
+
+        {/* Powered by Anthropic */}
+        {!collapsed && (
+          <div className="px-5 py-1.5">
+            <p className="text-[10px] text-white/25 text-center tracking-wide">
+              Powered by <span className="text-white/35">Anthropic</span>
+            </p>
+          </div>
+        )}
 
         {/* User section */}
         <div className="border-t border-white/10 p-3">

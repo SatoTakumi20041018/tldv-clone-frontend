@@ -19,6 +19,7 @@ export interface Meeting {
   platform: "zoom" | "google_meet" | "teams" | "other";
   participants: Participant[];
   status: "completed" | "processing" | "scheduled" | "live";
+  meetingType: "internal" | "external";
   summaryPreview?: string;
   videoUrl?: string;
   thumbnailUrl?: string;
@@ -72,7 +73,7 @@ export interface Integration {
   name: string;
   description: string;
   icon: string;
-  category: "crm" | "communication" | "project_management" | "storage";
+  category: "video_conferencing" | "crm" | "communication" | "project_management" | "storage" | "automation" | "note_taking" | "calendar" | "hr_recruitment";
   connected: boolean;
   status?: "active" | "inactive" | "error";
   lastSynced?: string;

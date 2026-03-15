@@ -6,6 +6,8 @@ import {
   SlidersHorizontal,
   Calendar,
   Video,
+  Users,
+  ArrowUpDown,
   X,
 } from "lucide-react";
 
@@ -14,25 +16,33 @@ interface SearchBarProps {
   onChange: (value: string) => void;
   placeholder?: string;
   onFilterChange?: (filters: SearchFilters) => void;
+  sortBy: SortOption;
+  onSortChange: (sort: SortOption) => void;
 }
+
+export type SortOption = "most_recent" | "oldest" | "duration";
 
 export interface SearchFilters {
   dateRange: "all" | "today" | "week" | "month" | "custom";
   platform: "all" | "zoom" | "google_meet" | "teams";
   status: "all" | "completed" | "processing" | "scheduled";
+  meetingType: "all" | "internal" | "external";
 }
 
 export default function SearchBar({
   value,
   onChange,
-  placeholder = "Search meetings...",
+  placeholder = "Search meetings, participants, or topics...",
   onFilterChange,
+  sortBy,
+  onSortChange,
 }: SearchBarProps) {
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState<SearchFilters>({
     dateRange: "all",
     platform: "all",
     status: "all",
+    meetingType: "all",
   });
 
   const updateFilter = (key: keyof SearchFilters, val: string) => {
@@ -45,9 +55,16 @@ export default function SearchBar({
     (v) => v !== "all"
   ).length;
 
+  const sortLabels: Record<SortOption, string> = {
+    most_recent: "Most Recent",
+    oldest: "Oldest",
+    duration: "Duration",
+  };
+
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
+        {/* Search input */}
         <div className="flex-1 flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2.5 shadow-sm focus-within:ring-2 focus-within:ring-brand-500/20 focus-within:border-brand-300 transition-all">
           <Search className="w-4 h-4 text-gray-400 flex-shrink-0" />
           <input
@@ -68,6 +85,24 @@ export default function SearchBar({
             </button>
           )}
         </div>
+
+        {/* Sort dropdown */}
+        <div className="relative">
+          <div className="flex items-center gap-1.5 px-3 py-2.5 bg-white border border-gray-200 rounded-xl text-sm text-text-secondary hover:border-gray-300 transition-all cursor-pointer">
+            <ArrowUpDown className="w-3.5 h-3.5" />
+            <select
+              value={sortBy}
+              onChange={(e) => onSortChange(e.target.value as SortOption)}
+              className="bg-transparent outline-none cursor-pointer text-sm text-text-secondary appearance-none pr-1"
+            >
+              <option value="most_recent">{sortLabels.most_recent}</option>
+              <option value="oldest">{sortLabels.oldest}</option>
+              <option value="duration">{sortLabels.duration}</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Filters button */}
         <button
           onClick={() => setShowFilters(!showFilters)}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-all
@@ -90,7 +125,7 @@ export default function SearchBar({
 
       {showFilters && (
         <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm animate-in slide-in-from-top-2">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Date Range */}
             <div>
               <label className="flex items-center gap-1.5 text-xs font-medium text-text-secondary mb-2">
@@ -127,6 +162,23 @@ export default function SearchBar({
               </select>
             </div>
 
+            {/* Meeting Type */}
+            <div>
+              <label className="flex items-center gap-1.5 text-xs font-medium text-text-secondary mb-2">
+                <Users className="w-3.5 h-3.5" />
+                Meeting Type
+              </label>
+              <select
+                value={filters.meetingType}
+                onChange={(e) => updateFilter("meetingType", e.target.value)}
+                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-text-primary outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-300"
+              >
+                <option value="all">All Types</option>
+                <option value="internal">Internal</option>
+                <option value="external">External</option>
+              </select>
+            </div>
+
             {/* Status */}
             <div>
               <label className="text-xs font-medium text-text-secondary mb-2 block">
@@ -152,6 +204,7 @@ export default function SearchBar({
                   dateRange: "all",
                   platform: "all",
                   status: "all",
+                  meetingType: "all",
                 };
                 setFilters(reset);
                 onFilterChange?.(reset);
