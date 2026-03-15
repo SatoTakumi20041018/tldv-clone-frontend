@@ -17,7 +17,7 @@ type UploadState = "idle" | "selected" | "uploading" | "processing" | "complete"
 
 const ACCEPTED_TYPES = [".mp4", ".webm", ".mov", ".avi"];
 const ACCEPTED_MIME = ["video/mp4", "video/webm", "video/quicktime", "video/x-msvideo"];
-const MAX_SIZE_BYTES = 100 * 1024 * 1024; // 100MB
+const MAX_SIZE_BYTES = 800 * 1024 * 1024; // 800MB
 
 const LANGUAGES = [
   { code: "en", label: "English" },
@@ -99,7 +99,7 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
       }
     }
     if (f.size > MAX_SIZE_BYTES) {
-      return `File is too large (${formatFileSize(f.size)}). Maximum size is 100MB.`;
+      return `File is too large (${formatFileSize(f.size)}). Maximum size is 800MB.`;
     }
     return null;
   }, []);
@@ -235,7 +235,7 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
     if (token) {
       xhr.setRequestHeader("Authorization", `Bearer ${token}`);
     }
-    xhr.timeout = 120000; // 2 minute timeout
+    xhr.timeout = 600000; // 10 minute timeout for large files
     xhr.send(formData);
   }, [file, fileName, language]);
 
@@ -340,7 +340,7 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
                 Browse files
               </span>
               <p className="text-xs text-text-muted mt-4">
-                MP4, WebM, MOV, AVI up to 100MB
+                MP4, WebM, MOV, AVI up to 800MB
               </p>
             </div>
           )}
